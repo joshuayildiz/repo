@@ -6,3 +6,7 @@ class Entry(models.Model):
 	personnel = models.CharField(max_length=80)
 	item = models.CharField(max_length=80)
 	qty = models.IntegerField()
+
+class Item(models.Model):
+	name = models.CharField(max_length=80)
+	qty = models.IntegerField()

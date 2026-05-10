@@ -1,18 +1,23 @@
 from django.shortcuts import render, redirect
 from django.core.paginator import Paginator
 from django.utils import timezone
+from django.db.models import Sum
 
-from .models import Entry
+from .models import Entry, Item
 
 # Create your views here.
-def index(req):
+def stock(req):
+	items = Item.objects.order_by('name')
+	return render(req, 'journal/stock.html', {'items': items})
+
+def history(req):
 	entries = Entry.objects.order_by('-timestamp')
 	paginator = Paginator(entries, 10)
 
 	page = req.GET.get('page')
 	page = paginator.get_page(page)
 
-	return render(req, 'journal/index.html', {
+	return render(req, 'journal/history.html', {
 		'entries': entries,
 		'page': page,
 	})
@@ -25,16 +30,20 @@ def new(req):
 		now = timezone.now()
 
 		for item, qty in zip(item_list, qty_list):
+			qty_int = int(qty)
 			Entry.objects.create(
 				timestamp=now,
 				personnel=personnel,
 				item=item,
-				qty=int(qty)
+				qty=qty_int
 			)
-		return redirect('index')
+			item_obj, _ = Item.objects.get_or_create(name=item, defaults={'qty': 0})
+			item_obj.qty += qty_int
+			item_obj.save()
 
-	# TODO: get item names from calculated stock to be performant
-	items = Entry.objects.values_list('item', flat=True).distinct().order_by('item')
+		return redirect('history')
+
+	items = Item.objects.values_list('name', flat=True).order_by('name')
 	return render(req, 'journal/new.html', {
 		'items': items,
 	})

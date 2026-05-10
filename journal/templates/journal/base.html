@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>{% block title %}Defter{% endblock %}</title>
+	<style>
+		* { box-sizing: border-box; }
+		html, body {
+			margin: 0;
+			padding: 0;
+			background: #fff;
+			color: #000;
+			font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+			font-size: 16px;
+			line-height: 1.45;
+			-webkit-font-smoothing: antialiased;
+		}
+		.wrap {
+			max-width: 640px;
+			margin: 0 auto;
+			padding: 1.5rem 1rem 4rem;
+		}
+		header {
+			display: flex;
+			align-items: baseline;
+			justify-content: space-between;
+			border-bottom: 1px solid #000;
+			padding-bottom: 0.75rem;
+			margin-bottom: 1rem;
+		}
+		h1 {
+			font-size: 1.5rem;
+			font-weight: 600;
+			margin: 0;
+		}
+		.nav {
+			display: flex;
+			gap: 1rem;
+			font-size: 0.875rem;
+		}
+		.nav a {
+			color: #666;
+			text-decoration: none;
+		}
+		.nav a:hover { color: #000; }
+		.nav a.active {
+			color: #000;
+			font-weight: 600;
+			border-bottom: 1px solid #000;
+			padding-bottom: 1px;
+		}
+		@media (min-width: 480px) {
+			h1 { font-size: 1.75rem; }
+			.wrap { padding: 2.5rem 1.5rem 4rem; }
+		}
+		{% block extra_css %}{% endblock %}
+	</style>
+</head>
+<body>
+	<div class="wrap">
+		<header>
+			<h1>{% block page_title %}Defter{% endblock %}</h1>
+			<nav class="nav">
+				<a href="{% url 'stock' %}" {% if request.resolver_match.name == 'stock' %}class="active"{% endif %}>Stok</a>
+				<a href="{% url 'history' %}" {% if request.resolver_match.name == 'history' %}class="active"{% endif %}>Tarih</a>
+				<a href="{% url 'new' %}" {% if request.resolver_match.name == 'new' %}class="active"{% endif %}>Yeni</a>
+			</nav>
+		</header>
+
+		{% block content %}{% endblock %}
+	</div>
+</body>
+</html>

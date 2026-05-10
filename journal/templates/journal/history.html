@@ -1,40 +1,9 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>Defter</title>
-	<style>
-		* { box-sizing: border-box; }
-		html, body {
-			margin: 0;
-			padding: 0;
-			background: #fff;
-			color: #000;
-			font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
-			font-size: 16px;
-			line-height: 1.45;
-			-webkit-font-smoothing: antialiased;
-		}
-		.wrap {
-			max-width: 640px;
-			margin: 0 auto;
-			padding: 1.5rem 1rem 4rem;
-		}
-		header {
-			display: flex;
-			align-items: baseline;
-			justify-content: space-between;
-			border-bottom: 1px solid #000;
-			padding-bottom: 0.75rem;
-			margin-bottom: 0.5rem;
-		}
-		h1 {
-			font-size: 1.5rem;
-			font-weight: 600;
-			letter-spacing: -0.01em;
-			margin: 0;
-		}
+{% extends "journal/base.html" %}
+
+{% block title %}Tarih{% endblock %}
+{% block page_title %}Tarih{% endblock %}
+
+{% block extra_css %}
 		.count {
 			font-size: 0.8125rem;
 			color: #666;
@@ -110,20 +79,10 @@
 			font-variant-numeric: tabular-nums;
 		}
 		nav.pager .spacer { width: 1px; }
-		@media (min-width: 480px) {
-			h1 { font-size: 1.75rem; }
-			.wrap { padding: 2.5rem 1.5rem 4rem; }
-		}
-	</style>
-</head>
-<body>
-	<div class="wrap">
-		<header>
-			<h1>Defter</h1>
-			<span class="count">{{ page.paginator.count }} kayıt</span>
-		</header>
+{% endblock %}
 
-		{% if page %}
+{% block content %}
+	{% if page %}
 			<ul class="entries">
 				{% for e in page %}
 					{% if e.qty == 0 %}
@@ -171,7 +130,5 @@
 					<span class="spacer"></span>
 				{% endif %}
 			</nav>
-		{% endif %}
-	</div>
-</body>
-</html>
+	{% endif %}
+{% endblock %}
