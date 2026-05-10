@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Defter</title>
+	<style>
+		* { box-sizing: border-box; }
+		html, body {
+			margin: 0;
+			padding: 0;
+			background: #fff;
+			color: #000;
+			font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+			font-size: 16px;
+			line-height: 1.45;
+			-webkit-font-smoothing: antialiased;
+		}
+		.wrap {
+			max-width: 640px;
+			margin: 0 auto;
+			padding: 1.5rem 1rem 4rem;
+		}
+		header {
+			display: flex;
+			align-items: baseline;
+			justify-content: space-between;
+			border-bottom: 1px solid #000;
+			padding-bottom: 0.75rem;
+			margin-bottom: 0.5rem;
+		}
+		h1 {
+			font-size: 1.5rem;
+			font-weight: 600;
+			letter-spacing: -0.01em;
+			margin: 0;
+		}
+		.count {
+			font-size: 0.8125rem;
+			color: #666;
+			font-variant-numeric: tabular-nums;
+		}
+		ul.entries {
+			list-style: none;
+			margin: 0;
+			padding: 0;
+		}
+		.entry {
+			position: relative;
+			padding: 0.625rem 0 0.625rem 0.875rem;
+			border-bottom: 1px solid #f0f0f0;
+			display: flex;
+			align-items: baseline;
+			justify-content: space-between;
+			gap: 0.75rem;
+			flex-wrap: wrap;
+		}
+		.entry:last-child { border-bottom: 0; }
+		.entry::before {
+			content: '';
+			position: absolute;
+			left: 0;
+			top: 1.05em;
+			width: 6px;
+			height: 6px;
+			border-radius: 50%;
+			background: #d4d4d4;
+		}
+		.entry.used::before { background: #eab308; }
+		.entry.left::before  { background: #22c55e; }
+		.entry.took::before  { background: #ef4444; }
+		.entry .text {
+			flex: 1;
+			min-width: 0;
+		}
+		.entry .person { font-weight: 600; }
+		.entry .verb { font-weight: 500; }
+		.entry.used .verb { color: #a16207; }
+		.entry.left .verb { color: #15803d; }
+		.entry.took .verb { color: #b91c1c; }
+		.entry time {
+			color: #666;
+			font-size: 0.8125rem;
+			font-variant-numeric: tabular-nums;
+			white-space: nowrap;
+		}
+		.empty {
+			text-align: center;
+			padding: 3rem 1rem;
+			color: #666;
+		}
+		nav.pager {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			margin-top: 2rem;
+			padding-top: 0.75rem;
+			border-top: 1px solid #000;
+			font-size: 0.875rem;
+		}
+		nav.pager a {
+			color: #000;
+			text-decoration: none;
+			border-bottom: 1px solid #000;
+			padding-bottom: 1px;
+		}
+		nav.pager a:hover { color: #666; border-color: #666; }
+		nav.pager .status {
+			color: #666;
+			font-variant-numeric: tabular-nums;
+		}
+		nav.pager .spacer { width: 1px; }
+		@media (min-width: 480px) {
+			h1 { font-size: 1.75rem; }
+			.wrap { padding: 2.5rem 1.5rem 4rem; }
+		}
+	</style>
+</head>
+<body>
+	<div class="wrap">
+		<header>
+			<h1>Defter</h1>
+			<span class="count">{{ page.paginator.count }} kayıt</span>
+		</header>
+
+		{% if page %}
+			<ul class="entries">
+				{% for e in page %}
+					{% if e.qty == 0 %}
+						<li class="entry used">
+							<span class="text">
+								<span class="person">{{ e.personnel }}</span>
+								{{ e.item }} <span class="verb">kullandı</span>
+							</span>
+							<time datetime="{{ e.timestamp|date:'c' }}">{{ e.timestamp|date:"j M · H:i" }}</time>
+						</li>
+					{% elif e.qty < 0 %}
+						<li class="entry took">
+							<span class="text">
+								<span class="person">{{ e.personnel }}</span>
+								{{ e.qty|stringformat:"d"|cut:"-" }} {{ e.item }} <span class="verb">aldı</span>
+							</span>
+							<time datetime="{{ e.timestamp|date:'c' }}">{{ e.timestamp|date:"j M · H:i" }}</time>
+						</li>
+					{% else %}
+						<li class="entry left">
+							<span class="text">
+								<span class="person">{{ e.personnel }}</span>
+								{{ e.qty }} {{ e.item }} <span class="verb">bıraktı</span>
+							</span>
+							<time datetime="{{ e.timestamp|date:'c' }}">{{ e.timestamp|date:"j M · H:i" }}</time>
+						</li>
+					{% endif %}
+				{% endfor %}
+			</ul>
+		{% else %}
+			<div class="empty">Henüz kayıt yok.</div>
+		{% endif %}
+
+		{% if page.has_other_pages %}
+			<nav class="pager">
+				{% if page.has_previous %}
+					<a href="?page={{ page.previous_page_number }}">← Önceki</a>
+				{% else %}
+					<span class="spacer"></span>
+				{% endif %}
+				<span class="status">{{ page.number }} / {{ page.paginator.num_pages }}</span>
+				{% if page.has_next %}
+					<a href="?page={{ page.next_page_number }}">Sonraki →</a>
+				{% else %}
+					<span class="spacer"></span>
+				{% endif %}
+			</nav>
+		{% endif %}
+	</div>
+</body>
+</html>

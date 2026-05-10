@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Yeni Kayıt</title>
+	<style>
+		* { box-sizing: border-box; }
+		html, body {
+			margin: 0;
+			padding: 0;
+			background: #fff;
+			color: #000;
+			font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+			font-size: 16px;
+			line-height: 1.45;
+			-webkit-font-smoothing: antialiased;
+		}
+		.wrap {
+			max-width: 640px;
+			margin: 0 auto;
+			padding: 1.5rem 1rem 4rem;
+		}
+		header {
+			display: flex;
+			align-items: baseline;
+			justify-content: space-between;
+			border-bottom: 1px solid #000;
+			padding-bottom: 0.75rem;
+			margin-bottom: 1.5rem;
+		}
+		h1 {
+			font-size: 1.5rem;
+			font-weight: 600;
+			margin: 0;
+		}
+		header a {
+			color: #666;
+			text-decoration: none;
+			font-size: 0.875rem;
+		}
+		header a:hover { color: #000; }
+		form { display: flex; flex-direction: column; gap: 1.5rem; }
+		.field {
+			display: flex;
+			flex-direction: column;
+			gap: 0.25rem;
+		}
+		label {
+			font-size: 0.8125rem;
+			font-weight: 600;
+			text-transform: uppercase;
+			letter-spacing: 0.05em;
+			color: #666;
+		}
+		input[type="text"],
+		input[type="number"] {
+			border: 0;
+			border-bottom: 1px solid #000;
+			padding: 0.625rem 0;
+			font: inherit;
+			background: none;
+		}
+		input[type="text"]:focus,
+		input[type="number"]:focus {
+			outline: 0;
+			border-color: #666;
+		}
+		.section-title {
+			font-weight: 600;
+			font-size: 0.9rem;
+			margin-top: 0.5rem;
+			margin-bottom: 0.75rem;
+			color: #000;
+		}
+		#added-items {
+			list-style: none;
+			margin: 0;
+			padding: 0;
+		}
+		.item-row {
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+			padding: 0.75rem 0;
+			border-bottom: 1px solid #f0f0f0;
+		}
+		.item-row:last-child { border-bottom: 0; }
+		.item-name {
+			font-weight: 500;
+			flex: 0 0 auto;
+			min-width: 80px;
+		}
+		.actions {
+			display: flex;
+			gap: 0.25rem;
+			flex: 0 0 auto;
+		}
+		.act-btn {
+			border: 1px solid #d4d4d4;
+			background: #fff;
+			color: #000;
+			padding: 0.375rem 0.5rem;
+			font-size: 0.75rem;
+			cursor: pointer;
+			font-weight: 500;
+		}
+		.act-btn:hover { border-color: #000; }
+		.act-btn.active { border-width: 2px; padding: 0.3125rem 0.4375rem; }
+		.act-btn.took.active { background: #ef4444; color: #fff; border-color: #ef4444; }
+		.act-btn.used.active { background: #eab308; color: #000; border-color: #eab308; }
+		.act-btn.left.active { background: #22c55e; color: #fff; border-color: #22c55e; }
+		.qty-input {
+			width: 50px;
+			text-align: center;
+		}
+		.qty-input:disabled {
+			opacity: 0.4;
+			cursor: not-allowed;
+		}
+		.remove-btn {
+			border: 0;
+			background: none;
+			color: #999;
+			font-size: 1.25rem;
+			cursor: pointer;
+			padding: 0;
+			line-height: 1;
+		}
+		.remove-btn:hover { color: #000; }
+		.empty-state {
+			text-align: center;
+			padding: 2rem 1rem;
+			color: #666;
+			font-size: 0.875rem;
+		}
+		button[type="submit"] {
+			background: #000;
+			color: #fff;
+			border: 0;
+			padding: 0.75rem;
+			font-size: 1rem;
+			font-weight: 600;
+			cursor: pointer;
+			margin-top: 1rem;
+		}
+		button[type="submit"]:hover { background: #333; }
+		button[type="submit"]:disabled {
+			background: #ccc;
+			cursor: not-allowed;
+		}
+		@media (min-width: 480px) {
+			h1 { font-size: 1.75rem; }
+			.wrap { padding: 2.5rem 1.5rem 4rem; }
+		}
+	</style>
+</head>
+<body>
+	<div class="wrap">
+		<header>
+			<h1>Yeni Kayıt</h1>
+			<a href="/">← Defter</a>
+		</header>
+
+		<form method="post" id="entry-form">
+			{% csrf_token %}
+
+			<div class="field">
+				<label>Kişi</label>
+				<input type="text" name="personnel" id="personnel" required autofocus>
+			</div>
+
+			<div class="field">
+				<label>Ürün Ara</label>
+				<input type="text" id="search" list="items-list" placeholder="Vida, çekiç, ...">
+				<datalist id="items-list">
+					{% for item in items %}<option value="{{ item }}">{% endfor %}
+				</datalist>
+			</div>
+
+			<div id="items-section" style="display: none;">
+				<div class="section-title">Seçili Ürünler</div>
+				<ul id="added-items"></ul>
+			</div>
+
+			<div id="empty-state" class="empty-state">Ürün eklemek için arayın ve seçin.</div>
+
+			<button type="submit" id="submit-btn" disabled>Kaydet</button>
+		</form>
+	</div>
+
+	<script>
+		const searchInput = document.getElementById('search');
+		const addedItems = document.getElementById('added-items');
+		const itemsSection = document.getElementById('items-section');
+		const emptyState = document.getElementById('empty-state');
+		const submitBtn = document.getElementById('submit-btn');
+		let itemCount = 0;
+
+		searchInput.addEventListener('change', handleSearchInput);
+		searchInput.addEventListener('keydown', function(e) {
+			if (e.key === 'Enter') {
+				e.preventDefault();
+				handleSearchInput.call(this);
+			}
+		});
+
+		function handleSearchInput() {
+			const name = searchInput.value.trim();
+			if (name) {
+				const existing = Array.from(addedItems.children).find(li => li.dataset.item === name);
+				if (!existing) {
+					addItem(name);
+				}
+				searchInput.value = '';
+			}
+		}
+
+		function addItem(name) {
+			const li = document.createElement('li');
+			li.className = 'item-row';
+			li.dataset.item = name;
+
+			const id = 'item-' + itemCount++;
+
+			li.innerHTML = `
+				<span class="item-name">${escapeHtml(name)}</span>
+				<div class="actions">
+					<button type="button" class="act-btn took" data-action="took" data-id="${id}" title="Aldı">Aldı</button>
+					<button type="button" class="act-btn used" data-action="used" data-id="${id}" title="Kullandı">Kul.</button>
+					<button type="button" class="act-btn left" data-action="left" data-id="${id}" title="Bıraktı">Bırak.</button>
+				</div>
+				<input type="number" class="qty-input" data-id="${id}" min="1" value="1">
+				<button type="button" class="remove-btn" data-item="${name}">×</button>
+				<input type="hidden" name="item[]" value="${escapeHtml(name)}">
+				<input type="hidden" name="qty[]" class="qty-field" data-id="${id}" value="-1">
+			`;
+
+			addedItems.appendChild(li);
+			updateUI();
+
+			// Default to "Aldı"
+			const tookBtn = li.querySelector('[data-action="took"]');
+			setAction(tookBtn, 'took');
+
+			const actionBtns = li.querySelectorAll('.act-btn');
+			actionBtns.forEach(btn => {
+				btn.addEventListener('click', (e) => {
+					e.preventDefault();
+					setAction(btn, btn.dataset.action);
+				});
+			});
+
+			const qtyInput = li.querySelector('.qty-input');
+			qtyInput.addEventListener('change', () => updateQty(id, qtyInput));
+
+			const removeBtn = li.querySelector('.remove-btn');
+			removeBtn.addEventListener('click', (e) => {
+				e.preventDefault();
+				li.remove();
+				updateUI();
+			});
+		}
+
+		function setAction(btn, action) {
+			const li = btn.closest('.item-row');
+			const id = btn.dataset.id;
+			const qtyField = li.querySelector('.qty-field');
+			const qtyInput = li.querySelector('.qty-input');
+
+			li.querySelectorAll('.act-btn').forEach(b => b.classList.remove('active'));
+			btn.classList.add('active');
+
+			if (action === 'used') {
+				qtyInput.disabled = true;
+				qtyField.value = '0';
+			} else if (action === 'took') {
+				qtyInput.disabled = false;
+				qtyField.value = '-' + qtyInput.value;
+			} else if (action === 'left') {
+				qtyInput.disabled = false;
+				qtyField.value = qtyInput.value;
+			}
+		}
+
+		function updateQty(id, input) {
+			const li = document.querySelector(`[data-id="${id}"]`).closest('.item-row');
+			const action = li.querySelector('.act-btn.active').dataset.action;
+			const qtyField = li.querySelector('.qty-field');
+			const val = parseInt(input.value) || 1;
+
+			if (action === 'took') {
+				qtyField.value = '-' + val;
+			} else if (action === 'left') {
+				qtyField.value = val;
+			}
+		}
+
+		function updateUI() {
+			const hasItems = addedItems.children.length > 0;
+			itemsSection.style.display = hasItems ? 'block' : 'none';
+			emptyState.style.display = hasItems ? 'none' : 'block';
+			submitBtn.disabled = !hasItems;
+		}
+
+		function escapeHtml(text) {
+			const div = document.createElement('div');
+			div.textContent = text;
+			return div.innerHTML;
+		}
+	</script>
+</body>
+</html>
