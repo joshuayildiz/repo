@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.core.paginator import Paginator
 from django.utils import timezone
-from django.db.models import Sum
+from django.db.models import Sum, Q
 
 from .models import Entry, Item
 
@@ -12,6 +12,9 @@ def stock(req):
 
 def history(req):
 	entries = Entry.objects.order_by('-timestamp')
+	q = req.GET.get('q', '').strip()
+	if q:
+		entries = entries.filter(Q(personnel__icontains=q) | Q(item__icontains=q))
 	paginator = Paginator(entries, 10)
 
 	page = req.GET.get('page')
@@ -20,6 +23,7 @@ def history(req):
 	return render(req, 'journal/history.html', {
 		'entries': entries,
 		'page': page,
+		'q': q,
 	})
 
 def new(req):

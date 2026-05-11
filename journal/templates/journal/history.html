@@ -79,9 +79,41 @@
 			font-variant-numeric: tabular-nums;
 		}
 		nav.pager .spacer { width: 1px; }
+		.search-form {
+			display: flex;
+			gap: 0.5rem;
+			margin-bottom: 1.5rem;
+		}
+		.search-form input {
+			flex: 1;
+			border: 0;
+			border-bottom: 1px solid #000;
+			padding: 0.625rem 0;
+			font: inherit;
+			background: none;
+		}
+		.search-form input:focus {
+			outline: 0;
+			border-color: #666;
+		}
+		.search-form button {
+			border: 0;
+			background: none;
+			color: #666;
+			font-size: 0.875rem;
+			cursor: pointer;
+			padding: 0.625rem 0.5rem;
+		}
+		.search-form button:hover { color: #000; }
 {% endblock %}
 
 {% block content %}
+	<form class="search-form" method="get">
+		<input type="text" name="q" placeholder="Ara..." value="{{ q }}">
+		<button type="submit">Ara</button>
+		{% if q %}<a href="{% url 'history' %}" style="align-self: center; color: #666; text-decoration: none;">✕</a>{% endif %}
+	</form>
+
 	{% if page %}
 			<ul class="entries">
 				{% for e in page %}
@@ -119,13 +151,13 @@
 		{% if page.has_other_pages %}
 			<nav class="pager">
 				{% if page.has_previous %}
-					<a href="?page={{ page.previous_page_number }}">← Önceki</a>
+					<a href="?q={{ q }}&page={{ page.previous_page_number }}">← Önceki</a>
 				{% else %}
 					<span class="spacer"></span>
 				{% endif %}
 				<span class="status">{{ page.number }} / {{ page.paginator.num_pages }}</span>
 				{% if page.has_next %}
-					<a href="?page={{ page.next_page_number }}">Sonraki →</a>
+					<a href="?q={{ q }}&page={{ page.next_page_number }}">Sonraki →</a>
 				{% else %}
 					<span class="spacer"></span>
 				{% endif %}
