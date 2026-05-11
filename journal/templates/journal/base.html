@@ -70,5 +70,18 @@
 
 		{% block content %}{% endblock %}
 	</div>
+
+	<script>
+		document.querySelectorAll('time[datetime]').forEach(el => {
+			const dt = new Date(el.getAttribute('datetime'));
+			const formatter = new Intl.DateTimeFormat('tr-TR', {
+				month: 'short',
+				day: 'numeric',
+				hour: '2-digit',
+				minute: '2-digit'
+			});
+			el.textContent = formatter.format(dt);
+		});
+	</script>
 </body>
 </html>
